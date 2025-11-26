@@ -1,0 +1,70 @@
+services:
+  mpi_master:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_master
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w1:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w1
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w2:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w2
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w3: 
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w3
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w4:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w4
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w5:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w5
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w6:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w6
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w7:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w7
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w8:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w8
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
+
+  mpi_w9:
+    image: ozxx33/mpi4py-cluster-base
+    platform: linux/amd64
+    container_name: mpi_w9
+    volumes: [ "./:/workspace" ]
+    command: bash -lc "service ssh start && sleep infinity"
