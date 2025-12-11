@@ -1,5 +1,5 @@
 
-There is no book.csv file, as it is big so, please add in the folder before using running the code
+There is no book.csv file, as it is big so, please add in the folder before running the code
 
 
 Perfect — here’s your Task 1 full setup and execution guide (the “1 master + 3 workers” part) written exactly how you can copy, paste, and even include in your report.
