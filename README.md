@@ -72,29 +72,35 @@ This project analyzes a large **book reviews CSV dataset** (~3 million rows) by 
 ```
 docker-mpi/
 │
-├── docker-compose.yml        # Defines the MPI cluster (1 master + 9 workers)
-├── hostfile                  # MPI hostfile listing all container hostnames
-├── master_key.pub            # SSH public key for passwordless inter-container auth
+├── docker-compose.yml          # Defines the MPI cluster (1 master + 9 workers)
+├── hostfile                    # MPI hostfile listing all container hostnames
+├── master_key.pub              # SSH public key for passwordless inter-container auth
+├── .env                        # Environment variables (PATH_DATASET, DATASET_SIZE) — not committed
+├── .gitignore                  # Git ignore rules
+├── README.md                   # Project documentation
 │
-├── t3.py                     # Q1 worker logic — all ranks participate (including master)
-├── t3_master_only.py         # Q1 master-only coordinator — master delegates, workers compute
+├── src/                        # Source code (organized by query)
+│   ├── q1/                     # Query 1 — Count books (avg RScore == 5, price == 2)
+│   │   ├── t3.py               #   Worker logic — all ranks participate
+│   │   └── t3_master_only.py   #   Master-only coordinator
+│   ├── q2/                     # Query 2 — Same as Q1, improved integer-safe comparison
+│   │   ├── t3q2.py             #   Worker logic
+│   │   └── t3q2_master.py      #   Master-only coordinator
+│   ├── q3/                     # Query 3 — User(s) with most books reviewed (avg RScore == 4)
+│   │   ├── t3q3.py             #   Worker logic
+│   │   └── t3q3_master.py      #   Master-only coordinator
+│   └── q4/                     # Query 4 — Top 10 highest-price books (avg RScore < 4)
+│       ├── t3q4.py             #   Worker logic
+│       └── t3q4_master.py      #   Master-only coordinator
 │
-├── t3q2.py                   # Q2 worker logic — count books with avg RScore == 5 & price == 2
-├── t3q2_master.py            # Q2 master-only coordinator
+├── results/                    # Benchmark timing data
+│   ├── q1_times.csv            #   Q1 execution time vs. container count
+│   ├── q2_times.csv            #   Q2 benchmark results
+│   ├── q3_times.csv            #   Q3 benchmark results
+│   └── q4_times.csv            #   Q4 benchmark results
 │
-├── t3q3.py                   # Q3 worker logic — user(s) who reviewed most books with avg RScore == 4
-├── t3q3_master.py            # Q3 master-only coordinator
-│
-├── t3q4.py                   # Q4 worker logic — top 10 highest-price books with avg RScore < 4
-├── t3q4_master.py            # Q4 master-only coordinator
-│
-├── q1_times.csv              # Benchmark results: Q1 execution time vs. container count
-├── q2_times.csv              # Benchmark results: Q2
-├── q3_times.csv              # Benchmark results: Q3
-├── q4_times.csv              # Benchmark results: Q4
-│
-├── help.txt                  # Step-by-step execution guide
-└── .env                      # Environment variables (PATH_DATASET, DATASET_SIZE) — not committed
+└── docs/                       # Additional documentation
+    └── help.txt                #   Step-by-step execution guide
 ```
 
 > **Note:** The book reviews CSV dataset (`book.csv`) is **not included** in this repository due to its large size. You must place it in the project root before running.
@@ -103,17 +109,17 @@ docker-mpi/
 
 ## Queries Implemented
 
-| Query  | File(s)                       | Description                                                                                                                       |
-| ------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Q1** | `t3.py` / `t3_master_only.py` | Count books where **average RScore == 5** and **BPrice == 2** (all ranks participate / master-only mode)                          |
-| **Q2** | `t3q2.py` / `t3q2_master.py`  | Count books where **average RScore == 5** and **BPrice == 2** (improved version with integer-safe comparison: `sum == 5 * count`) |
-| **Q3** | `t3q3.py` / `t3q3_master.py`  | Find the **user name(s)** who reviewed the **largest number of distinct books** among users with an **exact average RScore == 4** |
-| **Q4** | `t3q4.py` / `t3q4_master.py`  | Find the **top 10 highest-priced books** with an **average RScore < 4**, sorted by price descending (title ascending on tie)      |
+| Query  | File(s)                                     | Description                                                                                                                       |
+| ------ | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Q1** | `src/q1/t3.py` / `src/q1/t3_master_only.py` | Count books where **average RScore == 5** and **BPrice == 2** (all ranks participate / master-only mode)                          |
+| **Q2** | `src/q2/t3q2.py` / `src/q2/t3q2_master.py`  | Count books where **average RScore == 5** and **BPrice == 2** (improved version with integer-safe comparison: `sum == 5 * count`) |
+| **Q3** | `src/q3/t3q3.py` / `src/q3/t3q3_master.py`  | Find the **user name(s)** who reviewed the **largest number of distinct books** among users with an **exact average RScore == 4** |
+| **Q4** | `src/q4/t3q4.py` / `src/q4/t3q4_master.py`  | Find the **top 10 highest-priced books** with an **average RScore < 4**, sorted by price descending (title ascending on tie)      |
 
 Each query follows a **two-file pattern**:
 
-- `t3qX.py` — contains the `MPISolution` class with `_process_slice()` or `_work()` for chunk processing
-- `t3qX_master.py` — the master-only coordinator that distributes ranges, collects partial results, and merges them
+- `src/qX/t3qX.py` — contains the `MPISolution` class with `_process_slice()` or `_work()` for chunk processing
+- `src/qX/t3qX_master.py` — the master-only coordinator that distributes ranges, collects partial results, and merges them
 
 ---
 
@@ -173,7 +179,7 @@ cd /workspace
 Run the master-only program with 4 MPI processes (1 master + 3 workers):
 
 ```bash
-mpirun -n 4 -f /workspace/hostfile python /workspace/t3_master_only.py
+mpirun -n 4 -f /workspace/hostfile python /workspace/src/q1/t3_master_only.py
 ```
 
 **Expected output:**
@@ -191,55 +197,55 @@ mpirun -n 4 -f /workspace/hostfile python /workspace/t3_master_only.py
 
 Run each query with increasing numbers of MPI processes (4 through 10) and record the execution time:
 
-**Q1 — `t3_master_only.py`**
+**Q1 — `src/q1/t3_master_only.py`**
 
 ```bash
-echo "containers,seconds" > q1_times.csv
+echo "containers,seconds" > results/q1_times.csv
 for n in 4 5 6 7 8 9 10; do
   start=$(date +%s)
-  mpirun -n $n -f /workspace/hostfile python /workspace/t3_master_only.py > tmp_out.txt 2>&1
+  mpirun -n $n -f /workspace/hostfile python /workspace/src/q1/t3_master_only.py > tmp_out.txt 2>&1
   end=$(date +%s)
   elapsed=$((end - start))
-  echo "$n,$elapsed" | tee -a q1_times.csv
+  echo "$n,$elapsed" | tee -a results/q1_times.csv
 done
 ```
 
-**Q2 — `t3q2_master.py`**
+**Q2 — `src/q2/t3q2_master.py`**
 
 ```bash
-echo "containers,seconds" > q2_times.csv
+echo "containers,seconds" > results/q2_times.csv
 for n in 4 5 6 7 8 9 10; do
   start=$(date +%s)
-  mpirun -n $n -f /workspace/hostfile python /workspace/t3q2_master.py > tmp_out.txt 2>&1
+  mpirun -n $n -f /workspace/hostfile python /workspace/src/q2/t3q2_master.py > tmp_out.txt 2>&1
   end=$(date +%s)
   elapsed=$((end - start))
-  echo "$n,$elapsed" | tee -a q2_times.csv
+  echo "$n,$elapsed" | tee -a results/q2_times.csv
 done
 ```
 
-**Q3 — `t3q3_master.py`**
+**Q3 — `src/q3/t3q3_master.py`**
 
 ```bash
-echo "containers,seconds" > q3_times.csv
+echo "containers,seconds" > results/q3_times.csv
 for n in 4 5 6 7 8 9 10; do
   start=$(date +%s)
-  mpirun -n $n -f /workspace/hostfile python /workspace/t3q3_master.py > tmp_out.txt 2>&1
+  mpirun -n $n -f /workspace/hostfile python /workspace/src/q3/t3q3_master.py > tmp_out.txt 2>&1
   end=$(date +%s)
   elapsed=$((end - start))
-  echo "$n,$elapsed" | tee -a q3_times.csv
+  echo "$n,$elapsed" | tee -a results/q3_times.csv
 done
 ```
 
-**Q4 — `t3q4_master.py`**
+**Q4 — `src/q4/t3q4_master.py`**
 
 ```bash
-echo "containers,seconds" > q4_times.csv
+echo "containers,seconds" > results/q4_times.csv
 for n in 4 5 6 7 8 9 10; do
   start=$(date +%s)
-  mpirun -n $n -f /workspace/hostfile python /workspace/t3q4_master.py > tmp_out.txt 2>&1
+  mpirun -n $n -f /workspace/hostfile python /workspace/src/q4/t3q4_master.py > tmp_out.txt 2>&1
   end=$(date +%s)
   elapsed=$((end - start))
-  echo "$n,$elapsed" | tee -a q4_times.csv
+  echo "$n,$elapsed" | tee -a results/q4_times.csv
 done
 ```
 

@@ -1,12 +1,12 @@
 
-There is no book.csv file, as it is big so, please add in the folder before running the code
+NOTE: There is no book.csv file, as it is big so, please add it in the project
+root folder before running the code.
 
 
-Perfect — here’s your Task 1 full setup and execution guide (the “1 master + 3 workers” part) written exactly how you can copy, paste, and even include in your report.
-It’s clean, simple, and doesn’t record timing — just runs once to show output.
- 
-🧩 
-Task 1 — Run T3 Master-Only with 1 Master + 3 Workers
+Task 1 — Full Setup & Execution Guide
+======================================
+Run T3 Master-Only with 1 Master + 3 Workers
+(Just runs once to show output — no timing recorded.)
 
 Step 1 — Start Docker Cluster
 
@@ -25,7 +25,7 @@ cd /workspace
 The /workspace folder is mounted from your host so all containers share the same files (code + dataset).
  
 Step 4 — Run the T3 Master-Only Program
-mpirun -n 4 -f /workspace/hostfile python /workspace/t3_master_only.py
+mpirun -n 4 -f /workspace/hostfile python /workspace/src/q1/t3_master_only.py
 Explanation:
 •	-n 4 → total 4 processes (1 master + 3 workers)
 •	-f /workspace/hostfile → tells MPI which containers to use
@@ -38,95 +38,82 @@ Expected Output Example
  'answerPerThread': [0, 395814, 397612, 399231],
  'totalTimeTaken': 17.78
 }
-✅ This confirms your MPI cluster is working — the master coordinates while the 3 workers perform computation.
+This confirms your MPI cluster is working — the master coordinates while the 3 workers perform computation.
  
 That’s it for Task 1.
 Once this runs successfully, you’re ready to move on to Task 2 (analysis) using the timed loops for Q1–Q4.
 
 
-
-
-
-
-
-
-
-
-
-Perfect — here’s everything in one clean, ready-to-paste version for your report and terminal 
+Part 2 — Analysis (Q1–Q4 with 4→10 Workers)
+=============================================
+Each section below creates a CSV file with execution times in the results/ folder.
  
-🧮 
-Part 2 – Analysis (Q1–Q4 with 4→10 Workers)
-
-Each section below creates a CSV file with execution times.
- 
-Q1 – t3_master_only.py
+Q1 – src/q1/t3_master_only.py
 cd /workspace
-echo "containers,seconds" > q1_times.csv
+echo "containers,seconds" > results/q1_times.csv
 for n in 4 5 6 7 8 9 10; do
   echo ">>> START n=$n $(date +%T)"
   start=$(date +%s)
-  mpirun -n $n -f /workspace/hostfile python /workspace/t3_master_only.py > tmp_out.txt 2>&1
+  mpirun -n $n -f /workspace/hostfile python /workspace/src/q1/t3_master_only.py > tmp_out.txt 2>&1
   end=$(date +%s)
   elapsed=$((end - start))
   echo ">>> DONE n=$n $(date +%T) (time=${elapsed}s)"
   cat tmp_out.txt
-  echo "$n,$elapsed" | tee -a q1_times.csv
+  echo "$n,$elapsed" | tee -a results/q1_times.csv
 done
  
-Q2 – t3q2_master.py
+Q2 – src/q2/t3q2_master.py
 cd /workspace
-echo "containers,seconds" > q2_times.csv
+echo "containers,seconds" > results/q2_times.csv
 for n in 4 5 6 7 8 9 10; do
   echo ">>> START n=$n $(date +%T)"
   start=$(date +%s)
-  mpirun -n $n -f /workspace/hostfile python /workspace/t3q2_master.py > tmp_out.txt 2>&1
+  mpirun -n $n -f /workspace/hostfile python /workspace/src/q2/t3q2_master.py > tmp_out.txt 2>&1
   end=$(date +%s)
   elapsed=$((end - start))
   echo ">>> DONE n=$n $(date +%T) (time=${elapsed}s)"
   cat tmp_out.txt
-  echo "$n,$elapsed" | tee -a q2_times.csv
+  echo "$n,$elapsed" | tee -a results/q2_times.csv
 done
  
-Q3 – t3q3_master.py
+Q3 – src/q3/t3q3_master.py
 cd /workspace
-echo "containers,seconds" > q3_times.csv
+echo "containers,seconds" > results/q3_times.csv
 for n in 4 5 6 7 8 9 10; do
   echo ">>> START n=$n $(date +%T)"
   start=$(date +%s)
-  mpirun -n $n -f /workspace/hostfile python /workspace/t3q3_master.py > tmp_out.txt 2>&1
+  mpirun -n $n -f /workspace/hostfile python /workspace/src/q3/t3q3_master.py > tmp_out.txt 2>&1
   end=$(date +%s)
   elapsed=$((end - start))
   echo ">>> DONE n=$n $(date +%T) (time=${elapsed}s)"
   cat tmp_out.txt
-  echo "$n,$elapsed" | tee -a q3_times.csv
+  echo "$n,$elapsed" | tee -a results/q3_times.csv
 done
  
-Q4 – t3q4_master.py
+Q4 – src/q4/t3q4_master.py
 cd /workspace
-echo "containers,seconds" > q4_times.csv
+echo "containers,seconds" > results/q4_times.csv
 for n in 4 5 6 7 8 9 10; do
   echo ">>> START n=$n $(date +%T)"
   start=$(date +%s)
-  mpirun -n $n -f /workspace/hostfile python /workspace/t3q4_master.py > tmp_out.txt 2>&1
+  mpirun -n $n -f /workspace/hostfile python /workspace/src/q4/t3q4_master.py > tmp_out.txt 2>&1
   end=$(date +%s)
   elapsed=$((end - start))
   echo ">>> DONE n=$n $(date +%T) (time=${elapsed}s)"
   cat tmp_out.txt
-  echo "$n,$elapsed" | tee -a q4_times.csv
+  echo "$n,$elapsed" | tee -a results/q4_times.csv
 done
  
-⚙️ 
 How to Run Everything
 1.	Make sure Docker Desktop is running.
 2.	Start the cluster: docker compose up -d
 3.	Enter the master: docker exec -it mpi_master bash
 4.	Paste and run the command block for each section (Q1–Q4).
  
-📊 
 Outputs Created
-•	q1_times.csv, q2_times.csv, q3_times.csv, q4_times.csv → contain container count vs time
+•	results/q1_times.csv, results/q2_times.csv, results/q3_times.csv, results/q4_times.csv
+	→ contain container count vs time
 •	You can use these for your MPI Execution Analysis graph.
- 
-✅ That’s everything you need for your report and demo — paste as-is into your terminal inside mpi_master.
+
+That's everything you need for your report and demo — paste as-is into your terminal inside mpi_master.
 

@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+
+# OS
+.DS_Store
+
+# Temporary output
+tmp_out.txt
+
+# Dataset (too large to commit)
+*.csv
+!results/*.csv
